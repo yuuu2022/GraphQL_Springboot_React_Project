@@ -6,7 +6,7 @@ type Mutation {
   createEvent(eventInput: EventInput!): Event!
 }
 
-input EvenInput {
+input EventInput {
   title: String!
   description: String!
   price: Float!
