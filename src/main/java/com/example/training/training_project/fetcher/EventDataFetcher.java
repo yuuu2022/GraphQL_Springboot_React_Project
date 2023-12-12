@@ -17,19 +17,19 @@ public class EventDataFetcher {
     private List<Event> events = new ArrayList<>();
     
     @DgsQuery
-    public List<String> events(){
-        return Arrays.asList("this","is","a","list");
+    public List<Event> events(){
+        return events;
     }
 
     @DgsMutation
-    public Event createEvenet(@InputArgument(name ="eventInput") EventInput input){
-         Event newEvent = new Event();
-         newEvent.setId(UUID.randomUUID().toString());
-         newEvent.setTitle(input.getTitle());
-         newEvent.setDescription(input.getDescription());
-         newEvent.setPrice(input.getPrice());
-         newEvent.setDate(input.getDate());
-
+    public Event createEvent(@InputArgument(name ="eventInput") EventInput input){
+        System.out.println("createEvent");
+        Event newEvent = new Event();
+            newEvent.setId(UUID.randomUUID().toString());
+            newEvent.setTitle(input.getTitle());
+            newEvent.setDescription(input.getDescription());
+            newEvent.setPrice(input.getPrice());
+            newEvent.setDate(input.getDate());
          events.add(newEvent);
          return newEvent;
     }
