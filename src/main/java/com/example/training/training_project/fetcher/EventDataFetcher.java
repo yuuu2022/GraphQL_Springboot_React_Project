@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.training.training_project.entity.EventEntity;
+import com.example.training.training_project.mapper.EventEntityMapper;
 import com.example.training.training_project.type.Event;
 import com.example.training.training_project.type.EventInput;
 import com.netflix.graphql.dgs.DgsComponent;
@@ -14,23 +19,24 @@ import com.netflix.graphql.dgs.InputArgument;
 
 @DgsComponent
 public class EventDataFetcher {
-    private List<Event> events = new ArrayList<>();
+    private final EventEntityMapper eventEntityMapper;
+
+    public EventDataFetcher(EventEntityMapper eventEntityMapper){
+        this.eventEntityMapper = eventEntityMapper;
+    }
     
     @DgsQuery
     public List<Event> events(){
+        List<EventEntity> eventEntities = eventEntityMapper.selectList(new QueryWrapper<>());
+        List<Event> events = eventEntities.stream()
+                            .map(Event::fromEntity).collect(Collectors.toList());
         return events;
     }
 
     @DgsMutation
     public Event createEvent(@InputArgument(name ="eventInput") EventInput input){
-        System.out.println("createEvent");
-        Event newEvent = new Event();
-            newEvent.setId(UUID.randomUUID().toString());
-            newEvent.setTitle(input.getTitle());
-            newEvent.setDescription(input.getDescription());
-            newEvent.setPrice(input.getPrice());
-            newEvent.setDate(input.getDate());
-         events.add(newEvent);
-         return newEvent;
+        EventEntity eventEntity = EventEntity.fromEventEntity(input);
+        eventEntityMapper.insert(eventEntity);
+        return Event.fromEntity(eventEntity);
     }
 }
