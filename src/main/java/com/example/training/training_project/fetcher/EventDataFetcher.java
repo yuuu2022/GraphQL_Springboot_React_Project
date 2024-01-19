@@ -16,7 +16,7 @@ import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
-
+@Slf4j
 @DgsComponent
 public class EventDataFetcher {
     private final EventEntityMapper eventEntityMapper;
