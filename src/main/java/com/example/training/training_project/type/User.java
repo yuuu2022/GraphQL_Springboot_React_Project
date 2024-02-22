@@ -11,6 +11,7 @@ public class User {
     private String id;
     private String email;
     private String password;
+    private String List<String> createEvents = new ArrayList(createEvent);
 
     public static User fromEntity(UserEntity userEntity){
         User user = new User();

@@ -1,0 +1,10 @@
+http://localhost:5050/browser/
+http://localhost:8080/graphiql
+
+
+github:
+https://github.com/spring2go/graphql_event_app/tree/main
+
+
+
+

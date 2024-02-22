@@ -33,7 +33,7 @@ public class UserDataFetcher {
         newUserEntity.setPassword(passwordEncoder.encode(userInput.getPassword()));
         userEntityMapper.insert(newUserEntity);
 
-        newUserEntity.setPassword(null); // clear password 
+        newUserEntity.setPassword(null); // clear password then return the objects
         return User.fromEntity(newUserEntity);
     }
 

@@ -21,6 +21,7 @@ public class EventEntity {
     private String description;
     private Float price;
     private Date date;
+    private Integer creatorId;
 
     public static EventEntity fromEventEntity(EventInput input){
         EventEntity newEvent = new EventEntity();
@@ -28,6 +29,7 @@ public class EventEntity {
         newEvent.setDescription(input.getDescription());
         newEvent.setPrice(input.getPrice());
         newEvent.setDate(DateUtil.convertISOStringToDate(input.getDate()));
+        newEvent.setCreatorId(input.getCreatorId());
         return newEvent;
     }
 }
