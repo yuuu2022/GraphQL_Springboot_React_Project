@@ -1,14 +1,23 @@
 package com.example.training.training_project.fetcher;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.training.training_project.entity.EventEntity;
 import com.example.training.training_project.entity.UserEntity;
+import com.example.training.training_project.mapper.EventEntityMapper;
 import com.example.training.training_project.mapper.UserEntityMapper;
+import com.example.training.training_project.type.Event;
 import com.example.training.training_project.type.User;
 import com.example.training.training_project.type.UserInput;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsData;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
+import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +26,20 @@ import lombok.extern.slf4j.Slf4j;
 @DgsComponent
 public class UserDataFetcher {
     private final UserEntityMapper userEntityMapper;
+    private final EventEntityMapper eventEntityMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDataFetcher(UserEntityMapper userEntityMapper , PasswordEncoder passwordEncoder) {
+    public UserDataFetcher(UserEntityMapper userEntityMapper , PasswordEncoder passwordEncoder, EventEntityMapper eventEntityMapper) {
         this.userEntityMapper = userEntityMapper;
         this.passwordEncoder = passwordEncoder;
+        this.eventEntityMapper = eventEntityMapper;
+    }
+
+    @DgsQuery
+    public List<User> users(){
+        List<UserEntity> userEntities = userEntityMapper.selectList(null);
+        List<User> users = userEntities.stream().map(User::fromEntity).collect(Collectors.toList());
+        return users;
     }
 
     @DgsMutation
@@ -35,6 +53,16 @@ public class UserDataFetcher {
 
         newUserEntity.setPassword(null); // clear password then return the objects
         return User.fromEntity(newUserEntity);
+    }
+
+    @DgsData(parentType="User", field="createdEvents")
+    public List<Event> createEvents(DgsDataFetchingEnvironment dfe){
+        User user = dfe.getSource();
+        QueryWrapper<EventEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(EventEntity::getCreatorId, user.getId());
+        List<EventEntity> eventEntities = eventEntityMapper.selectList(queryWrapper);
+        List<Event> events = eventEntities.stream().map(Event::fromEntity).collect(Collectors.toList());
+        return events ;
     }
 
     private void ensureUserNotExists(UserInput userInput){
