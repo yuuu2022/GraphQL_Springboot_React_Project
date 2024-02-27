@@ -10,9 +10,12 @@ import com.example.training.training_project.entity.EventEntity;
 import com.example.training.training_project.entity.UserEntity;
 import com.example.training.training_project.mapper.EventEntityMapper;
 import com.example.training.training_project.mapper.UserEntityMapper;
+import com.example.training.training_project.type.AuthData;
 import com.example.training.training_project.type.Event;
+import com.example.training.training_project.type.LoginInput;
 import com.example.training.training_project.type.User;
 import com.example.training.training_project.type.UserInput;
+import com.example.training.training_project.util.TokenUtil;
 import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
@@ -40,6 +43,27 @@ public class UserDataFetcher {
         List<UserEntity> userEntities = userEntityMapper.selectList(null);
         List<User> users = userEntities.stream().map(User::fromEntity).collect(Collectors.toList());
         return users;
+    }
+
+    @DgsQuery
+    public AuthData login (@InputArgument LoginInput loginInput){
+        UserEntity userEntity = this.findUserByEmail(loginInput.getEmail());
+        if(userEntity == null){
+            throw new RuntimeException("The system has no this user");
+        }
+        
+        boolean match = passwordEncoder.matches(loginInput.getPassword(), userEntity.getPassword());
+        if(!match){
+            throw new RuntimeException("The password is not match");
+        }
+        
+        String token = TokenUtil.signToken(userEntity.getId(), 1);
+        
+        AuthData authData = new AuthData();
+        authData.setUserId(userEntity.getId());
+        authData.setToken(token);
+        authData.setToeknExpiration(1);
+        return authData;
     }
 
     @DgsMutation
@@ -71,5 +95,11 @@ public class UserDataFetcher {
         if(userEntityMapper.selectCount(queryWrapper) >=1){
             throw new RuntimeException("the email had been used !");
         }
+    }
+
+    private UserEntity findUserByEmail(String email){
+        QueryWrapper<UserEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserEntity::getEmail,email);
+        return userEntityMapper.selectOne(queryWrapper);
     }
 }
