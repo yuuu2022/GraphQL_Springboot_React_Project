@@ -6,5 +6,5 @@ import lombok.Data;
 public class AuthData {
     private Integer userId;
     private String token;
-    private Integer toeknExpiration;
+    private Integer tokenExpiration;
 }

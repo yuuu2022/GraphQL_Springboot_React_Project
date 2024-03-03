@@ -62,7 +62,7 @@ public class UserDataFetcher {
         AuthData authData = new AuthData();
         authData.setUserId(userEntity.getId());
         authData.setToken(token);
-        authData.setToeknExpiration(1);
+        authData.setTokenExpiration(1);
         return authData;
     }
 

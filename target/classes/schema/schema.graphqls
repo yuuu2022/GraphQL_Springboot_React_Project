@@ -46,5 +46,5 @@ input LoginInput{
 type AuthData{
   userId: ID!
   token: String!
-  toeknExpiration:Int!
+  tokenExpiration:Int!
 }
