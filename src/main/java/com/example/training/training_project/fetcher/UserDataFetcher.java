@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.training.training_project.custom.AuthContext;
 import com.example.training.training_project.entity.EventEntity;
 import com.example.training.training_project.entity.UserEntity;
 import com.example.training.training_project.mapper.EventEntityMapper;
@@ -22,6 +23,7 @@ import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +41,11 @@ public class UserDataFetcher {
     }
 
     @DgsQuery
-    public List<User> users(){
+    public List<User> users(DgsDataFetchingEnvironment dfe){
+                //AuthContext authContext = dfe.getContext();
+        AuthContext authContext = DgsContext.getCustomContext(dfe);
+        authContext.ensureAuthenticated();
+
         List<UserEntity> userEntities = userEntityMapper.selectList(null);
         List<User> users = userEntities.stream().map(User::fromEntity).collect(Collectors.toList());
         return users;

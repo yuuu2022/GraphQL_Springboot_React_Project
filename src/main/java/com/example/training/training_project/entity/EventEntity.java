@@ -29,7 +29,6 @@ public class EventEntity {
         newEvent.setDescription(input.getDescription());
         newEvent.setPrice(input.getPrice());
         newEvent.setDate(DateUtil.convertISOStringToDate(input.getDate()));
-        newEvent.setCreatorId(input.getCreatorId());
         return newEvent;
     }
 }

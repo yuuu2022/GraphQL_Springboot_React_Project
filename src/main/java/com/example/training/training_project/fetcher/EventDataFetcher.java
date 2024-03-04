@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.training.training_project.custom.AuthContext;
 import com.example.training.training_project.entity.EventEntity;
 import com.example.training.training_project.entity.UserEntity;
 import com.example.training.training_project.mapper.EventEntityMapper;
@@ -24,7 +25,9 @@ import com.netflix.graphql.dgs.DgsFederationResolver;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
 
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -41,7 +44,8 @@ public class EventDataFetcher {
     // }
     
     @DgsQuery
-    public List<Event> events(){
+    public List<Event> events(DgsDataFetchingEnvironment dfe){
+
         List<EventEntity> eventEntities = eventEntityMapper.selectList(new QueryWrapper<>());
         List<Event> events = eventEntities.stream()
                             .map(Event::fromEntity).collect(Collectors.toList());
@@ -56,8 +60,13 @@ public class EventDataFetcher {
     }
 
     @DgsMutation
-    public Event createEvent(@InputArgument(name ="eventInput") EventInput input){
+    public Event createEvent(@InputArgument(name ="eventInput") EventInput input ,DataFetchingEnvironment dfe){
+        //AuthContext authContext = dfe.getContext();
+        AuthContext authContext = DgsContext.getCustomContext(dfe);
+        authContext.ensureAuthenticated();
+        
         EventEntity newEventEntity = EventEntity.fromEventEntity(input);
+        newEventEntity.setCreatorId(authContext.getUserEntity().getId());
         eventEntityMapper.insert(newEventEntity);
         Event newEvent = Event.fromEntity(newEventEntity);
         //populateEventWithUser(newEvent, newEventEntity.getCreatorId());
